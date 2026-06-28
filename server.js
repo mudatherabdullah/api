@@ -8,10 +8,13 @@ const port = process.env.PORT || 3000;
 server.use(cors());
 server.use(express.json());
 
-const DATA_FILE = './tasks.json';
+const DATA_FILE = '/tmp/tasks.json';
 
 // دالة تقرأ من الملف
 const readTasks = () => {
+  if (!fs.existsSync(DATA_FILE)) {
+    return [];
+  }
   const data = fs.readFileSync(DATA_FILE, 'utf-8');
   return JSON.parse(data);
 };
