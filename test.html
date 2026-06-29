@@ -1,30 +1,51 @@
-<html lang="en">
+<!DOCTYPE html>
+<html lang="ar">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <title>اختبار API</title>
 </head>
 <body>
-  <h1>اختبار API</h1>
-  <button onclick="getTasks()">جيب المهام</button>
-  <button onclick="addTask()">add new task</button>
-  <pre id="result"></pre>
+<h1>اختبار API</h1>
+<button onclick="addTask()">add new task</button>
+<div id="out"></div>
 
-  <script>
-    async function getTasks() {
-      const res = await fetch('http://localhost:3000/tasks');
-      const data = await res.json();
-      document.getElementById('result').textContent = JSON.stringify(data, null, 2);
-    }
-    async function addTask() {
-  await fetch('http://localhost:3000/tasks', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({title: 'مهمة من المتصفح'})
-  });
-  getTasks(); // حدث القائمة
+<script>
+const API = 'https://api-himb.onrender.com/tasks';
+
+async function loadTasks() {
+  const res = await fetch(API);
+  const tasks = await res.json();
+  const out = document.getElementById('out');
+  
+  if(tasks.length === 0){
+    out.innerHTML = '<p>لا يوجد مهام</p>';
+    return;
+  }
+
+  out.innerHTML = tasks.map(t => `
+    <div style="margin: 5px 0; padding: 5px; border: 1px solid #ccc;">
+      ${t.id} - ${t.title} - ${t.done ? 'تم' : 'لا'}
+      <button onclick="deleteTask(${t.id})">حذف</button>
+    </div>
+  `).join('');
 }
-  </script>
 
+async function addTask() {
+  await fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: 'مهمة من المتصفح' })
+  });
+  loadTasks(); 
+}
+
+// لازم تستقبل id هنا
+async function deleteTask(id) { 
+  await fetch(`${API}/${id}`, { method: 'DELETE' });
+  loadTasks(); 
+}
+
+loadTasks(); // هذا يخليه يجيب الداتا لحاله
+</script>
 </body>
 </html>

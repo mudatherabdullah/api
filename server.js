@@ -5,10 +5,9 @@ const cors = require('cors');
 const server = express();
 const port = process.env.PORT || 3000;
 
+const DATA_FILE = '/tmp/tasks.json';
 server.use(cors());
 server.use(express.json());
-
-const DATA_FILE = '/tmp/tasks.json';
 
 // دالة تقرأ من الملف
 const readTasks = () => {
@@ -77,47 +76,21 @@ server.put('/tasks/:id', (req, res) => {
 });
 
 // DELETE حذف
-server.delete('/tasks/:id', (req, res) => {
-  let tasks = readTasks();
-  const id = Number(req.params.id);
-  tasks = tasks.filter(t => t.id !== id);
-  saveTasks(tasks);
-  res.json({success: true});
+
+app.delete('/tasks/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  const tasks = readTasks();
+  const newTasks = tasks.filter(t => t.id !== id); // احذف اللي الـ id حقه يساوي
+
+  if (tasks.length === newTasks.length) {
+    return res.status(404).json({ error: 'Task not found' }); // لو ما لقاه
+  }
+
+  saveTasks(newTasks);
+  res.status(204).send(); // 204 = تم الحذف بنجاح بدون داتا
 });
 
 server.listen(port, () => {
   console.log(`server work on http://localhost:${port}`);
 });
-/*
-server.get('/students', (req, res) => {
-    res.json('wellcom back agin');
- });
-let tasks =[ 
-{id: 1, title: "learn express", done: false},
-{id: 2, title: "build api", done: false}
- ];
 
-server.get('/tasks/:id', (req, res) => {
-   const id = Number(req.params.id);
-
-   const task = tasks.find((t)=> t.id === id);
-   if (!task) {
-      return res.status(400).json({error: `task is not fund`});
-   }
-    res.json(tasks);
- });
-
- server.post('/tasks', (req, res) => {
-   const newTask = {
-      id: tasks.length + 1,
-      title: req.body.title,
-      done: false
-   };
-   tasks.push(newTask);
-    res.json(newTask);
- });
-
- server.listen(PORT, ()=> {
-    console.log(`server work on http://localhost:${PORT}`);
- });
- **/
